@@ -8,17 +8,15 @@ const mqtt = require('mqtt');
 function Arduino() {
 
     // mon state
-
-    const [client, setClient] = useState(null);
-        const [state,setstate] = useState(1);
-        const [donnees,setdata] = useState([]);
-        const [information,setinformation] = useState({
-        items:[],
-        project_Name:"",
-        date_creation:"",
-        card_type:"",
-        arduino_code:"",
-        description:""
+    const [state,setstate] = useState(1);
+    const [donnees,setdata] = useState([]);
+    const [project,setproject] = useState("");
+    const [date,setdate] = useState("");
+    const [card,setcard] = useState("");
+    const [code,setcode] = useState("");
+    const [description,setdescription] = useState("");
+    const [information,setinformation] = useState({
+        items:[]
     })
 
     const data = {
@@ -38,6 +36,74 @@ function Arduino() {
     }
 
     // mon comportement
+
+    function modifier(_projectName,_date,_typeCard,_description,_code){
+        document.getElementById("project").value = _projectName ;
+        document.getElementById("date").value = _date;
+        document.getElementById("card").value = _typeCard;
+        document.getElementById("description").value = _description;
+        document.getElementById("code").value = _code;
+        document.getElementById("button1").style.display = "none";
+        document.getElementById("button2").style.display = "none";
+        document.getElementById("button3").style.display = "block";
+        document.getElementById("button4").style.display = "block";
+        document.getElementById("formulaire").style.display = "flex";
+        document.getElementById("encapsuleur").style.display = "flex";
+        document.getElementsByClassName("project_add")[0].style.display = "none";
+        for(let i = 0;i<document.getElementsByClassName("items").length;i++){
+            document.getElementsByClassName("items")[i].style.display = "none"
+        }
+        document.getElementById("exit").style.display = "inline"
+
+        fetch("http://127.0.0.1:2000/workspace/update/"+_projectName+"/"+_typeCard+"/"+_code+"/"+_date+"/"+_description).then((res)=>res.status)
+        alert("Projet mis à jour avec succès !")
+    }
+
+    function handlechange(e){
+        console.log(e.target.name);
+        switch(e.target.name){
+            case "project_Name":setproject(e.target.value)
+            break;
+
+            case "card_type":setcard(e.target.value)
+            break;
+
+            case "arduino_code":setcode(e.target.value)
+            break;
+
+            case "description":setdescription(e.target.value)
+            break;
+            
+            case "date_creation":setdate(e.target.value)
+            break;
+        }
+    }
+
+    function Enregistrer(){
+        var table = [project,date,card,code,description]
+        if((table[0]!="")&&(table[1]!="")&&(table[2]!="")&&(table[3]!="")&&(table[4]!="")){
+            fetch("http://127.0.0.1:2000/workspace/Create/"+project+"/"+card+"/"+code+"/"+date+"/"+description).then((res)=>res.status)
+            alert("insertion reussie")
+        }
+        else{
+            for(let i = 0;i<table.length;i++){
+                if(table[i]==""){
+                    document.getElementsByClassName("error")[i].style.display = "inline";
+                }
+            }
+        }
+    }
+
+
+    function add_project(){
+        document.getElementById("formulaire").style.display = "flex";
+        document.getElementById("encapsuleur").style.display = "flex";
+        document.getElementsByClassName("project_add")[0].style.display = "none";
+        for(let i = 0;i<document.getElementsByClassName("items").length;i++){
+            document.getElementsByClassName("items")[i].style.display = "none"
+        }
+        document.getElementById("exit").style.display = "inline"
+    }
 
     function test(e){
         const client  = mqtt.connect('ws://127.0.0.1:61614');
@@ -59,15 +125,13 @@ function Arduino() {
         }   
       }
 
-    function openitem(_projectName,date,typeCard,description,code){
-        setinformation({
-            items:information.items,
-            project_Name:_projectName,
-            date_creation:date,
-            card_type:typeCard,
-            arduino_code:code,
-            description:description
-        })
+    function openitem(projectName,date,typeCard,description,code){
+        setproject(projectName)
+        setcard(date)
+        setcode(typeCard)
+        setdescription(description)
+        setdate(code)
+
         document.getElementById("openitem").style.display = "flex";
         document.getElementsByClassName("items")[0].style.display = "none";
     }
@@ -94,14 +158,54 @@ function Arduino() {
 
     return(
         <>
+        <div id="formulaire">
+            <div id="encapsuleur">
+            <form>
+                <input type="text" id='project' onChange={(e)=>{
+                    handlechange(e)
+                }} placeholder="project name" name="project_Name"></input>
+                <p className="error">veuiller remplir le champ !</p>
+                <input type="date" id='date' onChange={(e)=>{
+                    handlechange(e)
+                }} placeholder="creation date" name="date_creation"></input>
+                <p className="error">veuiller remplir le champ !</p>
+                <input type="text"  id='card' onChange={(e)=>{
+                    handlechange(e)
+                }} placeholder="type of arduino card" name="card_type"></input>
+                <p className="error">veuiller remplir le champ !</p>
+                <input type="text"  onChange={(e)=>{
+                    handlechange(e)
+                }} placeholder="IP address to MQTT connection" name="ip_address"></input>
+                <textarea id='code' onChange={(e)=>{
+                    handlechange(e)
+                }} placeholder="code arduino" name="arduino_code"></textarea>
+                <p className="error">veuiller remplir le champ !</p>
+                <textarea id='description' onChange={(e)=>{
+                    handlechange(e)
+                }} placeholder="description du projet" name="description"></textarea>
+                <p className="error">veuiller remplir le champ !</p>
+                <input id="button1" type="button" onClick={()=>{
+                    Enregistrer()
+                }} value="Enregistrer"></input>
+                <input id="button2" type="button"  value="Enregistrer & monitorer"></input>
+                <input id="button3" type="button"  value="Modifier"></input>
+                <input id="button4" type="button"  value="Suprimer"></input>
+            </form>
+            <div className="corner" id="corner1"></div>
+            <div className="corner" id="corner2"></div>
+            <div className="corner" id="corner3"></div>
+            <div className="corner" id="corner4"></div>
+            <div className="corner" id="corner5"></div>
+            </div>
+        </div>
         <div id="openitem">
         <section id="openitem1" >
-            <p>{information.project_Name}</p>
+            <p>{project}</p>
         </section>
         <section id="openitem2" >
-            <p>{information.date_creation}</p>
-            <p>{information.card_type}</p>
-            <p>{information.description}</p>
+            <p>{date}</p>
+            <p>{card}</p>
+            <p>{description}</p>
         </section>
         <section id="openitem3" >
             <Line  data={data} options={options}/>
@@ -119,7 +223,9 @@ function Arduino() {
     </div>
     <div className="projects project_add">
         <div>
-            <img id="add" src={add}></img>
+            <img id="add" onClick={()=>{
+                add_project()
+            }} src={add}></img>
         </div>
     </div>
         {
@@ -140,7 +246,9 @@ function Arduino() {
                 <button onClick={()=>{
                     openitem(item.project_name,item.project_name,item.date_de_creation,item.type_carte_arduino,item.Description,item.code_arduino)
                 }}>OUVRIR</button>
-                <button className="modifier">MODIFIER</button>
+                <button onClick={()=>{
+                    modifier(item.project_name,item.project_name,item.date_de_creation,item.type_carte_arduino,item.Description,item.code_arduino)
+                }} className="modifier">MODIFIER</button>
             </section>
         </div>
         ))
@@ -490,18 +598,18 @@ export default Arduino;
 
 
 //     save = ()=>{
-//         var table = [this.state.project_Name,this.state.date_creation,this.state.card_type,this.state.arduino_code,this.state.description]
-//         if((table[0]!="")&&(table[1]!="")&&(table[2]!="")&&(table[3]!="")&&(table[4]!="")){
-//             fetch("http://127.0.0.1:2000/workspace/Create/"+this.state.project_Name+"/"+this.state.card_type+"/"+this.state.arduino_code+"/"+this.state.date_creation+"/"+this.state.description).then((res)=>res.status)
-//             alert("insertion reussie")
-//         }
-//         else{
-//             for(let i = 0;i<table.length;i++){
-//                 if(table[i]==""){
-//                     document.getElementsByClassName("error")[i].style.display = "inline";
-//                 }
-//             }
-//         }
+        // var table = [this.state.project_Name,this.state.date_creation,this.state.card_type,this.state.arduino_code,this.state.description]
+        // if((table[0]!="")&&(table[1]!="")&&(table[2]!="")&&(table[3]!="")&&(table[4]!="")){
+        //     fetch("http://127.0.0.1:2000/workspace/Create/"+this.state.project_Name+"/"+this.state.card_type+"/"+this.state.arduino_code+"/"+this.state.date_creation+"/"+this.state.description).then((res)=>res.status)
+        //     alert("insertion reussie")
+        // }
+        // else{
+        //     for(let i = 0;i<table.length;i++){
+        //         if(table[i]==""){
+        //             document.getElementsByClassName("error")[i].style.display = "inline";
+        //         }
+        //     }
+        // }
 //     }
 
 //     handlechange = (e)=>{
@@ -606,30 +714,30 @@ export default Arduino;
 
 //         return(<>
 //             <img id="exit" src={exit} onClick={this.close.bind(this)}></img>
-//             <div id="formulaire">
-//                 <div id="encapsuleur">
-//                 <form>
-//                     <input type="text" onChange={this.handlechange.bind()} placeholder="project name" name="project_Name"></input>
-//                     <p className="error">veuiller remplir le champ !</p>
-//                     <input type="date" onChange={this.handlechange1.bind()} placeholder="creation date" name="date_creation"></input>
-//                     <p className="error">veuiller remplir le champ !</p>
-//                     <input type="text" onChange={this.handlechange2.bind()} placeholder="type of arduino card" name="card_type"></input>
-//                     <p className="error">veuiller remplir le champ !</p>
-//                     <input type="text" onChange={this.handlechange3.bind()} placeholder="IP address to MQTT connection" name="ip_address"></input>
-//                     <textarea onChange={this.handlechange4.bind()} placeholder="code arduino" name="arduino_code"></textarea>
-//                     <p className="error">veuiller remplir le champ !</p>
-//                     <textarea onChange={this.handlechange5.bind()} placeholder="description du projet" name="dscription"></textarea>
-//                     <p className="error">veuiller remplir le champ !</p>
-//                     <input id="button1" type="button" onClick={this.save.bind()} value="Enregistrer"></input>
-//                     <input id="button2" type="button" onClick={this.handlechange.bind()} value="Enregistrer & monitorer"></input>
-//                 </form>
-//                 <div className="corner" id="corner1"></div>
-//                 <div className="corner" id="corner2"></div>
-//                 <div className="corner" id="corner3"></div>
-//                 <div className="corner" id="corner4"></div>
-//                 <div className="corner" id="corner5"></div>
-//                 </div>
-//             </div>
+            // <div id="formulaire">
+            //     <div id="encapsuleur">
+            //     <form>
+            //         <input type="text" onChange={this.handlechange.bind()} placeholder="project name" name="project_Name"></input>
+            //         <p className="error">veuiller remplir le champ !</p>
+            //         <input type="date" onChange={this.handlechange1.bind()} placeholder="creation date" name="date_creation"></input>
+            //         <p className="error">veuiller remplir le champ !</p>
+            //         <input type="text" onChange={this.handlechange2.bind()} placeholder="type of arduino card" name="card_type"></input>
+            //         <p className="error">veuiller remplir le champ !</p>
+            //         <input type="text" onChange={this.handlechange3.bind()} placeholder="IP address to MQTT connection" name="ip_address"></input>
+            //         <textarea onChange={this.handlechange4.bind()} placeholder="code arduino" name="arduino_code"></textarea>
+            //         <p className="error">veuiller remplir le champ !</p>
+            //         <textarea onChange={this.handlechange5.bind()} placeholder="description du projet" name="dscription"></textarea>
+            //         <p className="error">veuiller remplir le champ !</p>
+            //         <input id="button1" type="button" onClick={this.save.bind()} value="Enregistrer"></input>
+            //         <input id="button2" type="button" onClick={this.handlechange.bind()} value="Enregistrer & monitorer"></input>
+            //     </form>
+            //     <div className="corner" id="corner1"></div>
+            //     <div className="corner" id="corner2"></div>
+            //     <div className="corner" id="corner3"></div>
+            //     <div className="corner" id="corner4"></div>
+            //     <div className="corner" id="corner5"></div>
+            //     </div>
+            // </div>
 //             <section id="modification">
 //                     <input type="text" name="location" placeholder="Location" onChange={this.handlechange_bis} value={this.state.location}></input>
 //                     <input type="text" name="personinhouse" placeholder="Person in house" onChange={this.handlechange_bis1} value={this.state.personinhouse}></input>

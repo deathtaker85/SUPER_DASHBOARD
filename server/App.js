@@ -53,6 +53,20 @@ api.get("/workspace/read",(req,res)=>{
     })
 })
 
+// la modification de donne donc le update 
+api.get("/workspace/update/:project_name/:type_carte_arduino/:code_arduino/:date_de_creation/:description",(req,res)=>{
+    connect.then((client)=>{
+        collection = client.db("Dashboard_arduino").collection("arduino_projects")
+        collection.updateOne({"project_name":req.params.project_name},
+        {$set : {"type_carte_arduino":req.params.type_carte_arduino,
+        "code_arduino":req.params.code_arduino,
+        "date_de_creation":req.params.date_de_creation,
+        "Description":req.params.description}})
+    })
+})
+
+
+// la suppression de donne donc le delete
 
 
 
@@ -60,3 +74,28 @@ api.get("/workspace/read",(req,res)=>{
 
 
 
+
+
+
+// CETTE ZONE EST DEDIE AU CONTROL DES API EXTERNES
+
+
+
+
+
+
+
+
+//******************************************************** */
+
+// ici on va gerer les api qui permettent de faire de la messagerie
+
+// 
+api.get("/Messagerie/read",(req,res)=>{
+    connect.then((client)=>{
+        collection = client.db("Dashboard_arduino").collection("MESSAGERIE")
+        collection.find().toArray((err,result)=>{
+            res.json(result)
+        })
+    })
+})

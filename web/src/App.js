@@ -5,6 +5,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./components/Home";
 import Arduino from "./components/Arduino";
 import React from "react";
+import API from "./components/API";
+import Parametre from "./components/Parametre";
+import Messenger from "./components/Messagerie";
 
 class App extends React.Component{
 
@@ -20,15 +23,15 @@ class App extends React.Component{
       <BrowserRouter>
       <Left_nav_bar/>
       <Top_nav_bar/>
-      
+      <div id="sous_container1">
       <Routes>
-        <Route path="/home" element={<Sous_container composant={<Home/>} />}></Route>
-        <Route path="/workspace" element={
-          <div id="sous_container1">
-            {<Arduino/>}
-          </div>
-        }></Route>
+        <Route path="/" element={<Sous_container composant={<Home/>} />}></Route>
+        <Route path="/workspace" element={ <Arduino/>}></Route>
+        <Route path="/API" element={<API/>}></Route>
+        <Route path="/Parametre" element={<Parametre/>}></Route>
+        <Route path="/Messagerie" element={<Messenger/>}></Route>
       </Routes>
+      </div>
       </BrowserRouter>
       </div>
       </>
