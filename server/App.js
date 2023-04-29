@@ -3,7 +3,7 @@ const express = require("express");
 const api = express();
 const cors = require("cors");
 const MongoClient = require('mongodb').MongoClient;
-const MONGO_URL = 'mongodb+srv://Randry_claude:KoronysMaster1886@cluster0.ijk4ncf.mongodb.net/test';
+const MONGO_URL = 'your_url_mongo';
 const connect = MongoClient.connect(MONGO_URL);
 
 api.use(cors())
